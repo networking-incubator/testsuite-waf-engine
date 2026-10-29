@@ -2,9 +2,10 @@
 
 Tests that the WAF buffers and inspects request bodies regardless of how
 they are framed. An attacker can move a payload out of the query string
-into a form body, split it across chunked encoding, hide it behind a
-trailer, or pad it so that only a prefix fits the inspection limit; none
-of these should let the payload through.
+into a form body, split it across chunked encoding, or hide it behind a
+trailer; none of these framings should let the payload through.
+
+Payloads placed past the buffered body size are covered in test_limits.py.
 
 Expected triggering rules:
   - 941100: XSS attack detected via libinjection
@@ -67,21 +68,5 @@ def test_sqli_in_trailer_terminated_body(chunked_request):
     )
     assert resp.status_code == 403, (
         f"SQLi in a trailer-terminated body should be blocked "
-        f"(expected 403, got {resp.status_code})"
-    )
-
-
-@pytest.mark.attack
-@pytest.mark.body_inspection
-@pytest.mark.sqli
-def test_sqli_at_start_of_oversized_body(gateway_url, browser_session):
-    """A payload inside the inspected prefix is caught even if the body is truncated."""
-    resp = browser_session.post(
-        f"{gateway_url}/greet",
-        data={"name": "1' OR '1'='1", "padding": "x" * 65536},
-        timeout=30,
-    )
-    assert resp.status_code == 403, (
-        f"SQLi in the inspected body prefix should be blocked "
         f"(expected 403, got {resp.status_code})"
     )

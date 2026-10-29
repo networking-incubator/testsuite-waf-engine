@@ -38,6 +38,26 @@ BROWSER_UA = (
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
 
+# Status codes that mean the WAF stopped the request, as opposed to the
+# backend answering it. Used by tests that can only assert "not blocked",
+# because the app behind the gateway owns the final status code.
+BLOCKED = (403, 413)
+# A malformed request the proxy refused to parse — a framing bug in the
+# test helper, not a WAF decision.
+MALFORMED = 400
+
+
+def pytest_collection_modifyitems(config, items):
+    """Mark every test with the directory it lives in: rules/ or engine/.
+
+    A rules/ failure means the ruleset missed or over-matched a payload.
+    An engine/ failure means the connector mishandled the request itself.
+    """
+    for item in items:
+        parent = item.path.parent.name
+        if parent in ("rules", "engine"):
+            item.add_marker(getattr(pytest.mark, parent))
+
 
 @pytest.fixture(scope="session")
 def extra_headers(request):

@@ -21,6 +21,16 @@ test-true: uv-env
 test-attack: uv-env
 	$(PYTEST) -m 'attack'
 
+# CRS detection coverage - a failure here is a ruleset or tuning problem.
+.PHONY: test-rules
+test-rules: uv-env
+	$(PYTEST) -m rules
+
+# WAF connector behavior - a failure here is an engine problem.
+.PHONY: test-engine
+test-engine: uv-env
+	$(PYTEST) -m engine
+
 
 
 

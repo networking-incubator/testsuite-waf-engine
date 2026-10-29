@@ -8,7 +8,10 @@ dependencies = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = ["tests"]
 markers = [
+    "rules: CRS detection coverage - applied automatically to tests/rules",
+    "engine: WAF connector behavior - applied automatically to tests/engine",
     "normal: legitimate traffic that should pass through the WAF",
     "attack: attack payloads that should be blocked (403)",
     "sqli: CRS 942 - SQL injection",

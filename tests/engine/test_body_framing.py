@@ -1,36 +1,18 @@
-"""Normal traffic — legitimate requests that should pass through the WAF.
+"""Request body framing — benign traffic the connector must forward untouched.
 
-These tests verify that the WAF does not block ordinary user interactions:
-homepage access, greeting with simple names, and names containing spaces.
-All requests use a browser User-Agent to avoid CRS protocol enforcement
-rules that penalize non-browser clients (920350 + orphaned chain scoring).
+Covers the body framing variants a WAF has to buffer and release correctly:
+empty bodies, chunked transfer-encoding, chunked bodies terminated by a
+trailer, and the Expect: 100-continue handshake. A failure here is a
+connector or filter-chain bug, not a ruleset decision.
 
-The request-lifecycle tests below cover body framing variants that the WAF
-must forward untouched: empty bodies, chunked encoding, trailers, bodies
-larger than the inspection limit, and the Expect: 100-continue handshake.
-They assert only that the WAF did not block the request, because the
-backend behind the gateway decides the final status code.
+These assert only that the WAF did not block or mangle the request, because
+the backend behind the gateway owns the final status code. Byte-exact
+pass-through needs an echo endpoint the target app does not yet have.
 """
 
 import pytest
 
-
-BLOCKED = (403, 413)
-MALFORMED = 400
-
-
-CASES = [
-    pytest.param("GET", "/", {}, id="homepage"),
-    pytest.param("GET", "/greet", {"params": {"name": "World"}}, id="greet-world"),
-    pytest.param("GET", "/greet", {"params": {"name": "Alice Bob"}}, id="greet-spaces"),
-]
-
-
-@pytest.mark.normal
-@pytest.mark.parametrize("method,path,kwargs", CASES)
-def test_normal_traffic(gateway_url, browser_session, method, path, kwargs):
-    resp = browser_session.request(method, f"{gateway_url}{path}", **kwargs, timeout=10)
-    assert resp.status_code == 200, f"Normal request should succeed: {resp.text[:200]}"
+from conftest import BLOCKED, MALFORMED
 
 
 @pytest.mark.normal
@@ -52,19 +34,6 @@ def test_empty_request_body(gateway_url, browser_session):
     resp = browser_session.post(f"{gateway_url}/greet", data=b"", timeout=10)
     assert resp.status_code not in BLOCKED, (
         f"Empty request body should not be blocked (got {resp.status_code})"
-    )
-
-
-@pytest.mark.normal
-def test_oversized_benign_request_body(gateway_url, browser_session):
-    """A benign body past the inspection limit is truncated for inspection, not rejected."""
-    resp = browser_session.post(
-        f"{gateway_url}/greet",
-        data={"name": "x" * 65536},
-        timeout=30,
-    )
-    assert resp.status_code not in BLOCKED, (
-        f"Oversized benign body should not be blocked (got {resp.status_code})"
     )
 
 
@@ -120,24 +89,3 @@ def test_head_request_without_body(gateway_url, browser_session):
         f"HEAD request should succeed (got {resp.status_code})"
     )
     assert not resp.content, "HEAD response should not carry a body"
-
-
-@pytest.mark.normal
-def test_normal_traffic_after_blocked_request(gateway_url, browser_session):
-    """A blocked request leaves no state that breaks the next request on the connection."""
-    blocked = browser_session.get(
-        f"{gateway_url}/greet",
-        params={"name": "1' OR '1'='1"},
-        timeout=10,
-    )
-    assert blocked.status_code == 403, (
-        f"Setup attack should be blocked (got {blocked.status_code})"
-    )
-    resp = browser_session.get(
-        f"{gateway_url}/greet",
-        params={"name": "Alice"},
-        timeout=10,
-    )
-    assert resp.status_code == 200, (
-        f"Request after a block should succeed (got {resp.status_code})"
-    )
