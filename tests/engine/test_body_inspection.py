@@ -70,3 +70,32 @@ def test_sqli_in_trailer_terminated_body(chunked_request):
         f"SQLi in a trailer-terminated body should be blocked "
         f"(expected 403, got {resp.status_code})"
     )
+
+
+@pytest.mark.attack
+@pytest.mark.body_inspection
+@pytest.mark.multipart
+@pytest.mark.sqli
+@pytest.mark.xfail(
+    reason="multipart body panics the Wasm VM (temp_dir unsupported on WASI)",
+    strict=False,
+)
+def test_multipart_body_is_inspected(gateway_url, browser_session):
+    """A payload inside a multipart part is inspected like any other body.
+
+    The same payload in a urlencoded body is blocked, so a multipart
+    wrapper must not become a way around request body inspection.
+
+    Carries the multipart marker, so it is excluded from a default run
+    along with tests/rules/test_multipart.py — see that module for why.
+    """
+    resp = browser_session.post(
+        f"{gateway_url}/greet",
+        data=b'--X\r\nContent-Disposition: form-data; name="name"\r\n'
+        b"\r\n1' OR '1'='1\r\n--X--\r\n",
+        headers={"Content-Type": "multipart/form-data; boundary=X"},
+        timeout=10,
+    )
+    assert resp.status_code == 403, (
+        f"SQLi in a multipart part should be blocked (expected 403, got {resp.status_code})"
+    )

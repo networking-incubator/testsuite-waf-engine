@@ -11,6 +11,12 @@ Expected triggering rules:
   - 944110: Java injection attack (Spring expression, OGNL)
   - 944120: possible Java serialization payload
   - 944130: suspicious Java class detected
+
+Serialized-object payloads are not covered here on purpose. The rule that
+catches them, 944210, matches the base64 magic bytes rO0ABQ / KztAAU /
+Cs7QAF but is tagged paranoia-level/2, and the stock crs-setup runs at
+paranoia level 1. A test for it would only pass on a gateway configured
+above PL1.
 """
 
 import pytest
@@ -31,6 +37,11 @@ CASES = [
         "GET", "/greet",
         {"params": {"name": "${runtime.exec('cat /etc/passwd')}"}},
         id="ognl-runtime-exec",
+    ),
+    pytest.param(
+        "GET", "/greet",
+        {"params": {"name": "class.module.classLoader.resources.context"}},
+        id="spring4shell-classloader",
     ),
 ]
 

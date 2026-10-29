@@ -5,8 +5,9 @@ Tests that OS command injection payloads are blocked by OWASP CRS rules
 common system commands used to probe or exfiltrate data.
 
 Expected triggering rules:
-  - 932100: remote command execution (direct Unix command)
-  - 932105: remote command execution (common command patterns)
+  - 932250/932260: remote command execution — direct Unix command execution
+  - 932270: remote command execution — Unix shell expression found
+  - 932370/932380: remote command execution — Windows command injection
 """
 
 import pytest
@@ -20,6 +21,22 @@ CASES = [
     pytest.param(
         "GET", "/greet", {"params": {"name": "| ls -la /"}},
         id="pipe-injection",
+    ),
+    pytest.param(
+        "GET", "/greet", {"params": {"name": "$(id)"}},
+        id="subshell-expansion",
+    ),
+    pytest.param(
+        "GET", "/greet", {"params": {"name": "x=`cat /etc/passwd`"}},
+        id="backtick-substitution",
+    ),
+    pytest.param(
+        "GET", "/greet", {"params": {"name": "/bin/bash -c id"}},
+        id="explicit-shell-invocation",
+    ),
+    pytest.param(
+        "GET", "/greet", {"params": {"name": "powershell -enc ZQBjAGgAbwA="}},
+        id="powershell-encoded-command",
     ),
 ]
 

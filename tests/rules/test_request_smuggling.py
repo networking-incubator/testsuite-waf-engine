@@ -9,6 +9,7 @@ Expected triggering rules:
   - 921110: HTTP request smuggling attack (CR/LF in request line)
   - 921120: HTTP response splitting attack (CR/LF in headers)
   - 921130: HTTP response splitting attack (CR/LF in parameter)
+  - 921200: LDAP injection attack
 """
 
 import pytest
@@ -29,6 +30,11 @@ CASES = [
         "GET", "/greet",
         {"params": {"name": "test\nSet-Cookie: evil=1"}},
         id="lf-cookie-injection",
+    ),
+    pytest.param(
+        "GET", "/greet",
+        {"params": {"name": "*)(uid=*))(|(uid=*"}},
+        id="ldap-filter-injection",
     ),
 ]
 

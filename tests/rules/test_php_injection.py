@@ -10,8 +10,10 @@ Expected triggering rules:
   - 933100: PHP injection attack — opening/closing tag found
   - 933110: PHP injection attack — PHP script file upload found
   - 933120: PHP injection attack — configuration directive found
+  - 933130: PHP injection attack — PHP variables found
   - 933150: PHP injection attack — high-risk PHP function name found
   - 933160: PHP injection attack — high-risk PHP function call found
+  - 933200: PHP injection attack — wrapper scheme detected
 """
 
 import pytest
@@ -32,6 +34,21 @@ CASES = [
         "GET", "/greet",
         {"params": {"name": "<?php passthru('cat /etc/passwd'); ?>"}},
         id="php-passthru",
+    ),
+    pytest.param(
+        "GET", "/greet",
+        {"params": {"name": "php://input"}},
+        id="php-wrapper-scheme",
+    ),
+    pytest.param(
+        "GET", "/greet",
+        {"params": {"name": "php://filter/convert.base64-encode/resource=index.php"}},
+        id="php-filter-source-disclosure",
+    ),
+    pytest.param(
+        "GET", "/greet",
+        {"params": {"name": "$_SERVER[DOCUMENT_ROOT]"}},
+        id="php-superglobal-variable",
     ),
 ]
 

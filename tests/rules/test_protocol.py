@@ -8,6 +8,7 @@ Expected triggering rules:
   - 920280: request missing a Host header
   - 920340: request containing content but missing Content-Type header
   - 920420: request Content-Type is not allowed by policy
+  - 920440: URL file extension is restricted by policy
   - 949111: inbound anomaly score exceeded (early blocking)
 
 In this demo environment, non-browser User-Agents are blocked because:
@@ -81,4 +82,21 @@ def test_content_body_without_content_type(gateway_url, browser_session):
     )
     assert resp.status_code == 403, (
         f"Missing Content-Type with body should be blocked (expected 403, got {resp.status_code})"
+    )
+
+
+RESTRICTED_URL_CASES = [
+    pytest.param("/backup.bak", id="backup-extension"),
+    pytest.param("/.git/config", id="vcs-metadata-path"),
+]
+
+
+@pytest.mark.attack
+@pytest.mark.protocol
+@pytest.mark.parametrize("path", RESTRICTED_URL_CASES)
+def test_restricted_url(gateway_url, browser_session, path):
+    """URLs for files that should never be served — triggers CRS 920440."""
+    resp = browser_session.get(f"{gateway_url}{path}", timeout=10)
+    assert resp.status_code == 403, (
+        f"{path} should be blocked (expected 403, got {resp.status_code})"
     )

@@ -4,11 +4,16 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "pytest>=8.0",
+    "pytest-html>=4.1",
     "requests>=2.32",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["tests"]
+# Multipart requests currently panic the engine's Wasm VM, and each panic
+# degrades the gateway for every later request, so they are opt-in:
+# run them on their own with `make test-multipart`.
+addopts = "-m 'not multipart' -q"
 markers = [
     "rules: CRS detection coverage - applied automatically to tests/rules",
     "engine: WAF connector behavior - applied automatically to tests/engine",
@@ -27,6 +32,8 @@ markers = [
     "php_injection: CRS 933 - PHP injection",
     "method_enforcement: CRS 911 - HTTP method enforcement",
     "java_attack: CRS 944 - Java / Spring attack",
+    "generic: CRS 934 - SSTI, SSRF, Node.js, Ruby, prototype pollution, ORM injection",
+    "multipart: CRS 922 - multipart/form-data structural attacks",
     "chain: multi-step chained attack scenarios",
     "body_inspection: request body inspection across body framing variants",
 ]

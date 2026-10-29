@@ -6,6 +6,11 @@ signatures (sqlmap, nikto, nmap, etc.) and block matching requests.
 
 Expected triggering rules:
   - 913100: found User-Agent associated with security scanner
+
+913100 is the only scanner rule left. Upstream removed 913110 (scanner
+HTTP headers) and 913120 (scanner URLs / filenames) as ineffective, along
+with the scanners-urls.data list, so there is nothing else here to cover
+— do not add tests for those IDs.
 """
 
 import pytest

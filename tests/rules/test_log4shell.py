@@ -1,12 +1,13 @@
-"""CRS 934 — Log4Shell / JNDI Injection.
+"""CRS 944 — Log4Shell / JNDI Injection.
 
-Tests that JNDI lookup payloads (CVE-2021-44228) are blocked by OWASP CRS
-rules 934100-934999. These rules detect ${jndi:...} patterns in headers,
-query parameters, and request bodies — the attack vector used by Log4Shell
-to achieve remote code execution via Java's JNDI naming interface.
+Tests that JNDI lookup payloads (CVE-2021-44228) are blocked. The rule
+lives in the Java family (REQUEST-944-APPLICATION-ATTACK-JAVA.conf), and
+matches ${jndi:...} patterns in headers, query parameters, and request
+bodies — the vector Log4Shell uses to reach remote code execution through
+Java's JNDI naming interface.
 
 Expected triggering rules:
-  - 934100: JNDI injection attempt (${jndi:ldap://...})
+  - 944150: potential remote command execution — Log4j / Log4Shell
 """
 
 import pytest
