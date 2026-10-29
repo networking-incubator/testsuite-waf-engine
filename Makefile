@@ -13,6 +13,26 @@ uv-env:
 test: uv-env
 	$(PYTEST)
 
+
+# --- linting -----------------------------------------------------------
+# Needs no gateway. `check` is what CI runs; it never rewrites a file.
+.PHONY: lint
+lint: uv-env
+	uv run ruff check .
+
+.PHONY: lint-fix
+lint-fix: uv-env
+	uv run ruff check --fix .
+
+.PHONY: format
+format: uv-env
+	uv run ruff format .
+
+.PHONY: check
+check: uv-env
+	uv run ruff check .
+	uv run ruff format --check .
+
 # An explicit -m replaces the default filter in pyproject.toml, so every
 # selection below has to re-exclude multipart itself.
 .PHONY: test-true
