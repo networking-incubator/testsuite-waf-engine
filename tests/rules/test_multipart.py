@@ -47,8 +47,7 @@ CASES = [
         id="content-transfer-encoding-part-header",
     ),
     pytest.param(
-        b'--X\r\nContent-Disposition: form-data; name="_charset_"\r\n'
-        b"\r\nutf-8\r\n--X--\r\n",
+        b'--X\r\nContent-Disposition: form-data; name="_charset_"\r\n\r\nutf-8\r\n--X--\r\n',
         id="charset-part",
     ),
     pytest.param(
@@ -57,8 +56,7 @@ CASES = [
         id="illegal-part-content-type-charset",
     ),
     pytest.param(
-        b'--X\r\nContent-Disposition: form-data; name="name"\r\n'
-        b"\xc0Evil: x\r\n\r\nA\r\n--X--\r\n",
+        b'--X\r\nContent-Disposition: form-data; name="name"\r\n\xc0Evil: x\r\n\r\nA\r\n--X--\r\n',
         id="invalid-header-byte-range",
     ),
 ]

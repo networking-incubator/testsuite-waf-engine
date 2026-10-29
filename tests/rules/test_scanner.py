@@ -18,12 +18,14 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "test"}, "headers": {"User-Agent": "sqlmap/1.0"}},
         id="sqlmap-ua",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "test"}, "headers": {"User-Agent": "nikto/2.1.6"}},
         id="nikto-ua",
     ),

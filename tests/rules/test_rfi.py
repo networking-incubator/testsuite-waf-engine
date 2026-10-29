@@ -17,17 +17,20 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "http://evil.com/shell.txt?"}},
         id="http-url-trailing-question",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "https://attacker.com/backdoor.php?"}},
         id="https-url-trailing-question",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "http://192.168.1.1/shell.txt"}},
         id="http-url-with-ip-address",
     ),

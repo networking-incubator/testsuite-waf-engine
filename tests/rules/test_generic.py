@@ -26,41 +26,57 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet", {"params": {"name": "{{7*7}}"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "{{7*7}}"}},
         id="ssti-expression",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "${7*7}"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "${7*7}"}},
         id="ssti-dollar-expression",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "http://169.254.169.254/latest/meta-data/"}},
         id="ssrf-cloud-metadata",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "http://localhost/admin"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "http://localhost/admin"}},
         id="ssrf-internal-hostname",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "http://127.0.0.1:22/"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "http://127.0.0.1:22/"}},
         id="ssrf-ip-address",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": 'require("child_process").exec("id")'}},
         id="nodejs-injection",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "__proto__[x]=y"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "__proto__[x]=y"}},
         id="prototype-pollution",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": 'IO.popen("id")'}},
+        "GET",
+        "/greet",
+        {"params": {"name": 'IO.popen("id")'}},
         id="ruby-injection",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": '{"$ne": null}'}},
+        "GET",
+        "/greet",
+        {"params": {"name": '{"$ne": null}'}},
         id="orm-operator-injection",
     ),
 ]

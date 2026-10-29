@@ -24,9 +24,7 @@ REFERER_NOT_INSPECTED = "engine does not inspect REQUEST_HEADERS:Referer"
 @pytest.mark.sqli
 def test_sqli_in_query_string(gateway_url, browser_session):
     """Baseline: the payload is caught in the query string."""
-    resp = browser_session.get(
-        f"{gateway_url}/greet", params={"name": SQLI}, timeout=10
-    )
+    resp = browser_session.get(f"{gateway_url}/greet", params={"name": SQLI}, timeout=10)
     assert resp.status_code == 403, (
         f"SQLi in the query string should be blocked (got {resp.status_code})"
     )
@@ -42,9 +40,7 @@ def test_sqli_in_cookie(gateway_url, browser_session):
         headers={"Cookie": f"sid={SQLI}"},
         timeout=10,
     )
-    assert resp.status_code == 403, (
-        f"SQLi in a cookie should be blocked (got {resp.status_code})"
-    )
+    assert resp.status_code == 403, f"SQLi in a cookie should be blocked (got {resp.status_code})"
 
 
 @pytest.mark.attack
@@ -57,9 +53,7 @@ def test_sqli_in_user_agent(gateway_url, browser_session):
         headers={"User-Agent": SQLI},
         timeout=10,
     )
-    assert resp.status_code == 403, (
-        f"SQLi in User-Agent should be blocked (got {resp.status_code})"
-    )
+    assert resp.status_code == 403, f"SQLi in User-Agent should be blocked (got {resp.status_code})"
 
 
 @pytest.mark.attack
@@ -78,6 +72,4 @@ def test_sqli_in_referer(gateway_url, browser_session):
         headers={"Referer": SQLI},
         timeout=10,
     )
-    assert resp.status_code == 403, (
-        f"SQLi in Referer should be blocked (got {resp.status_code})"
-    )
+    assert resp.status_code == 403, f"SQLi in Referer should be blocked (got {resp.status_code})"

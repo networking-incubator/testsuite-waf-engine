@@ -16,9 +16,7 @@ import pytest
 SQLI = "1' OR '1'='1"
 XSS = "<script>alert(1)</script>"
 
-JSON_BODY_NOT_PARSED = (
-    "engine does not parse JSON bodies into args (audit log shows args:{})"
-)
+JSON_BODY_NOT_PARSED = "engine does not parse JSON bodies into args (audit log shows args:{})"
 
 
 @pytest.mark.attack

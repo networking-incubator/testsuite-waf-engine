@@ -15,27 +15,39 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet", {"params": {"name": "; cat /etc/passwd"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "; cat /etc/passwd"}},
         id="command-injection",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "| ls -la /"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "| ls -la /"}},
         id="pipe-injection",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "$(id)"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "$(id)"}},
         id="subshell-expansion",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "x=`cat /etc/passwd`"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "x=`cat /etc/passwd`"}},
         id="backtick-substitution",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "/bin/bash -c id"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "/bin/bash -c id"}},
         id="explicit-shell-invocation",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "powershell -enc ZQBjAGgAbwA="}},
+        "GET",
+        "/greet",
+        {"params": {"name": "powershell -enc ZQBjAGgAbwA="}},
         id="powershell-encoded-command",
     ),
 ]

@@ -17,22 +17,26 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "test\r\nContent-Length: 0"}},
         id="crlf-content-length-injection",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "test\r\n\r\n<html>injected</html>"}},
         id="crlf-response-splitting",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "test\nSet-Cookie: evil=1"}},
         id="lf-cookie-injection",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "*)(uid=*))(|(uid=*"}},
         id="ldap-filter-injection",
     ),

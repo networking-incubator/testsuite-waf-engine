@@ -21,32 +21,38 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "<?php system('id'); ?>"}},
         id="php-system-call",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "<?php eval($_GET['cmd']); ?>"}},
         id="php-eval-injection",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "<?php passthru('cat /etc/passwd'); ?>"}},
         id="php-passthru",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "php://input"}},
         id="php-wrapper-scheme",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "php://filter/convert.base64-encode/resource=index.php"}},
         id="php-filter-source-disclosure",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "$_SERVER[DOCUMENT_ROOT]"}},
         id="php-superglobal-variable",
     ),

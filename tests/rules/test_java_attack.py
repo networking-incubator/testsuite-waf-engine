@@ -24,22 +24,26 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "${T(java.lang.Runtime).getRuntime().exec('id')}"}},
         id="spring-expression-rce",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "java.lang.ProcessBuilder"}},
         id="java-processbuilder-class",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "${runtime.exec('cat /etc/passwd')}"}},
         id="ognl-runtime-exec",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "class.module.classLoader.resources.context"}},
         id="spring4shell-classloader",
     ),

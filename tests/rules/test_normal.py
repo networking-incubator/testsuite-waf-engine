@@ -35,14 +35,10 @@ def test_normal_traffic_after_blocked_request(gateway_url, browser_session):
         params={"name": "1' OR '1'='1"},
         timeout=10,
     )
-    assert blocked.status_code == 403, (
-        f"Setup attack should be blocked (got {blocked.status_code})"
-    )
+    assert blocked.status_code == 403, f"Setup attack should be blocked (got {blocked.status_code})"
     resp = browser_session.get(
         f"{gateway_url}/greet",
         params={"name": "Alice"},
         timeout=10,
     )
-    assert resp.status_code == 200, (
-        f"Request after a block should succeed (got {resp.status_code})"
-    )
+    assert resp.status_code == 200, f"Request after a block should succeed (got {resp.status_code})"

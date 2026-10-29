@@ -17,28 +17,38 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet", {"params": {"name": "<script>alert(1)</script>"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "<script>alert(1)</script>"}},
         id="script-tag",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": '<img src=x onerror="alert(1)">'}},
+        "GET",
+        "/greet",
+        {"params": {"name": '<img src=x onerror="alert(1)">'}},
         id="img-onerror",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "<svg onload=alert(1)>"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "<svg onload=alert(1)>"}},
         id="svg-onload",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "javascript:alert(1)"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "javascript:alert(1)"}},
         id="javascript-uri",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": '<iframe srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;">'}},
         id="iframe-srcdoc",
     ),
     pytest.param(
-        "GET", "/greet",
+        "GET",
+        "/greet",
         {"params": {"name": "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="}},
         id="data-uri-base64",
     ),

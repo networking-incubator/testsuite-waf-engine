@@ -17,7 +17,6 @@ CRS rules involved: 913100 (scanner detection), 942100-942440 (SQLi).
 """
 
 import pytest
-import requests
 
 
 @pytest.mark.attack
@@ -131,7 +130,10 @@ class TestSQLiAttackChain:
         """
         resp = browser_session.get(
             f"{gateway_url}/greet",
-            params={"name": "' UNION SELECT table_name FROM information_schema.tables WHERE table_schema=database()-- "},
+            params={
+                "name": "' UNION SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema=database()-- "
+            },
             timeout=10,
         )
         assert resp.status_code == 403, (
@@ -147,7 +149,10 @@ class TestSQLiAttackChain:
         """
         resp = browser_session.get(
             f"{gateway_url}/greet",
-            params={"name": "' UNION SELECT column_name FROM information_schema.columns WHERE table_name='greetings'-- "},
+            params={
+                "name": "' UNION SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='greetings'-- "
+            },
             timeout=10,
         )
         assert resp.status_code == 403, (

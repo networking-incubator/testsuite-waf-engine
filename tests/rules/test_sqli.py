@@ -16,15 +16,21 @@ import pytest
 
 CASES = [
     pytest.param(
-        "GET", "/greet", {"params": {"name": "1' OR '1'='1"}},
+        "GET",
+        "/greet",
+        {"params": {"name": "1' OR '1'='1"}},
         id="or-tautology",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "' UNION SELECT name FROM greetings-- "}},
+        "GET",
+        "/greet",
+        {"params": {"name": "' UNION SELECT name FROM greetings-- "}},
         id="union-select",
     ),
     pytest.param(
-        "GET", "/greet", {"params": {"name": "'; DROP TABLE greetings;-- "}},
+        "GET",
+        "/greet",
+        {"params": {"name": "'; DROP TABLE greetings;-- "}},
         id="drop-table",
     ),
 ]

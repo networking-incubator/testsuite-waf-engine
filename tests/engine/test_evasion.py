@@ -30,9 +30,7 @@ LITERAL_CASES = [
 @pytest.mark.parametrize("payload", LITERAL_CASES)
 def test_obfuscated_payload(gateway_url, browser_session, payload):
     """Case-shifted, entity-escaped and comment-split payloads stay blocked."""
-    resp = browser_session.get(
-        f"{gateway_url}/greet", params={"name": payload}, timeout=10
-    )
+    resp = browser_session.get(f"{gateway_url}/greet", params={"name": payload}, timeout=10)
     assert resp.status_code == 403, (
         f"Obfuscated payload should be blocked (expected 403, got {resp.status_code})"
     )
@@ -40,9 +38,7 @@ def test_obfuscated_payload(gateway_url, browser_session, payload):
 
 ENCODED_CASES = [
     pytest.param("%3Cscript%3Ealert(1)%3C/script%3E", id="xss-url-encoded"),
-    pytest.param(
-        "%253Cscript%253Ealert(1)%253C/script%253E", id="xss-double-url-encoded"
-    ),
+    pytest.param("%253Cscript%253Ealert(1)%253C/script%253E", id="xss-double-url-encoded"),
     pytest.param("%00%3Cscript%3Ealert(1)%3C/script%3E", id="xss-null-byte-prefix"),
     pytest.param("1%27%20OR%20%271%27%3D%271", id="sqli-url-encoded"),
 ]

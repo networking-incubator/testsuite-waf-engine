@@ -84,7 +84,5 @@ def test_chunked_body_with_trailer(chunked_request):
 def test_head_request_without_body(gateway_url, browser_session):
     """A HEAD response ends at the headers, with no body for the WAF to buffer."""
     resp = browser_session.head(f"{gateway_url}/", timeout=10)
-    assert resp.status_code == 200, (
-        f"HEAD request should succeed (got {resp.status_code})"
-    )
+    assert resp.status_code == 200, f"HEAD request should succeed (got {resp.status_code})"
     assert not resp.content, "HEAD response should not carry a body"

@@ -1,7 +1,5 @@
 import http.client
-import json
 import socket
-import subprocess
 from urllib.parse import urlsplit
 
 import pytest
@@ -13,7 +11,7 @@ def pytest_addoption(parser):
         "--url",
         default=None,
         help="Base URL of the gateway (e.g. http://172.18.255.127). "
-             "Auto-detected from kubectl if omitted.",
+        "Auto-detected from kubectl if omitted.",
     )
     parser.addoption(
         "--header",
@@ -21,7 +19,7 @@ def pytest_addoption(parser):
         default=[],
         metavar="NAME:VALUE",
         help="Extra header sent with every request (e.g. 'Host: waf.example.com'). "
-             "Repeatable. Headers set explicitly by a test take precedence.",
+        "Repeatable. Headers set explicitly by a test take precedence.",
     )
 
 
@@ -66,9 +64,7 @@ def extra_headers(request):
     for item in request.config.getoption("--header"):
         name, sep, value = item.partition(":")
         if not sep or not name.strip():
-            raise pytest.UsageError(
-                f"--header expects 'NAME: VALUE', got {item!r}"
-            )
+            raise pytest.UsageError(f"--header expects 'NAME: VALUE', got {item!r}")
         headers[name.strip()] = value.strip()
     return headers
 
@@ -120,9 +116,7 @@ def chunked_request(gateway_url, extra_headers):
         }
         connection = _connect(gateway_url, timeout)
         try:
-            connection.putrequest(
-                method, path, skip_host=True, skip_accept_encoding=True
-            )
+            connection.putrequest(method, path, skip_host=True, skip_accept_encoding=True)
             for name, value in request_headers.items():
                 connection.putheader(name, value)
             connection.putheader("Transfer-Encoding", "chunked")
@@ -135,9 +129,7 @@ def chunked_request(gateway_url, extra_headers):
             if trailer is None:
                 connection.send(b"0\r\n\r\n")
             else:
-                connection.send(
-                    b"0\r\nx-client-trailer: " + trailer.encode("ascii") + b"\r\n\r\n"
-                )
+                connection.send(b"0\r\nx-client-trailer: " + trailer.encode("ascii") + b"\r\n\r\n")
             response = connection.getresponse()
             return RawResponse(
                 response.status,
@@ -181,5 +173,3 @@ def socket_request(gateway_url):
         return int(status_line[1]) if len(status_line) > 1 else None
 
     return send
-
-

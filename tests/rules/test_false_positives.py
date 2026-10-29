@@ -36,10 +36,7 @@ CASES = [
 @pytest.mark.parametrize("payload", CASES)
 def test_benign_input_is_not_blocked(gateway_url, browser_session, payload):
     """Each value is legitimate user input and must reach the backend."""
-    resp = browser_session.get(
-        f"{gateway_url}/greet", params={"name": payload}, timeout=10
-    )
+    resp = browser_session.get(f"{gateway_url}/greet", params={"name": payload}, timeout=10)
     assert resp.status_code != 403, (
-        f"Legitimate input {payload!r} was blocked as an attack "
-        f"(got {resp.status_code})"
+        f"Legitimate input {payload!r} was blocked as an attack (got {resp.status_code})"
     )
