@@ -1,0 +1,29 @@
+[project]
+name = "battle-grounds-tests"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "pytest>=8.0",
+    "requests>=2.32",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "normal: legitimate traffic that should pass through the WAF",
+    "attack: attack payloads that should be blocked (403)",
+    "sqli: CRS 942 - SQL injection",
+    "xss: CRS 941 - cross-site scripting",
+    "lfi: CRS 930 - local file inclusion / path traversal",
+    "rce: CRS 932 - remote code execution / command injection",
+    "scanner: CRS 913 - scanner / bot detection",
+    "log4shell: CRS 934 - Log4Shell / JNDI injection",
+    "session_fixation: CRS 943 - session fixation",
+    "protocol: CRS 920 + anomaly scoring - protocol enforcement",
+    "request_smuggling: CRS 921 - HTTP request smuggling / response splitting",
+    "rfi: CRS 931 - remote file inclusion",
+    "php_injection: CRS 933 - PHP injection",
+    "method_enforcement: CRS 911 - HTTP method enforcement",
+    "java_attack: CRS 944 - Java / Spring attack",
+    "chain: multi-step chained attack scenarios",
+    "body_inspection: request body inspection across body framing variants",
+]
