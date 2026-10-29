@@ -11,7 +11,6 @@ asserted here — that distinction needs a known directives map.
 """
 
 import pytest
-
 from conftest import BLOCKED
 
 

@@ -11,7 +11,6 @@ Expected triggering rules:
 """
 
 import pytest
-
 from conftest import BROWSER_UA
 
 

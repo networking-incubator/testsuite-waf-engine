@@ -11,7 +11,6 @@ pass-through needs an echo endpoint the target app does not yet have.
 """
 
 import pytest
-
 from conftest import BLOCKED, MALFORMED
 
 

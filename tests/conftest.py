@@ -47,7 +47,7 @@ BLOCKED = (403, 413)
 MALFORMED = 400
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(items):
     """Mark every test with the directory it lives in: rules/ or engine/.
 
     A rules/ failure means the ruleset missed or over-matched a payload.
@@ -170,7 +170,7 @@ def socket_request(gateway_url):
                 if not chunk:
                     break
                 chunks.append(chunk)
-        except socket.timeout:
+        except TimeoutError:
             pass
         finally:
             connection.close()

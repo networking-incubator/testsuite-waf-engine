@@ -17,8 +17,8 @@ In this demo environment, non-browser User-Agents are blocked because:
   - Total = 5 = blocking threshold → 949111 fires
 """
 
-import requests
 import pytest
+import requests
 
 
 @pytest.mark.attack
