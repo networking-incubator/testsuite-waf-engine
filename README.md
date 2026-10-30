@@ -17,11 +17,8 @@ make test GATEWAY_URL=http://172.18.255.127
 make test-attack GATEWAY_URL=http://gateway:10000 HEADERS="--header 'Host: waf.example.com'"
 ```
 
-Other targets: `test-true` (legitimate traffic), `test-rules`, `test-engine`.
-
-Multipart requests currently panic the engine's Wasm VM and degrade the
-gateway for later requests, so they are excluded by default and run on their
-own with `make test-multipart`.
+Other targets: `test-true` (legitimate traffic), `test-rules`, `test-engine`,
+`test-multipart`.
 
 ## Linting
 
