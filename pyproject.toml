@@ -1,0 +1,71 @@
+[project]
+name = "battle-grounds-tests"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "pytest>=8.0",
+    "pytest-html>=4.1",
+    "requests>=2.32",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "W",
+    "F",    # pyflakes
+    "I",    # import order
+    "B",    # bugbears
+    "C4",   # comprehensions
+    "UP",   # pyupgrade
+    "SIM",  # simplifications
+    "RET",  # return style
+    "ARG",  # unused arguments
+    "PT",   # pytest idioms
+]
+
+[tool.ruff.lint.isort]
+# The suite keeps two blank lines between the imports and the first CASES list.
+lines-after-imports = 2
+
+[tool.ruff.lint.flake8-pytest-style]
+# The suite already writes parametrize names as "method,path,kwargs".
+parametrize-names-type = "csv"
+
+[tool.pytest.ini_options]
+pythonpath = ["tests"]
+# Multipart requests currently panic the engine's Wasm VM, and each panic
+# degrades the gateway for every later request, so they are opt-in:
+# run them on their own with `make test-multipart`.
+addopts = "-m 'not multipart' -q"
+markers = [
+    "rules: CRS detection coverage - applied automatically to tests/rules",
+    "engine: WAF connector behavior - applied automatically to tests/engine",
+    "normal: legitimate traffic that should pass through the WAF",
+    "attack: attack payloads that should be blocked (403)",
+    "sqli: CRS 942 - SQL injection",
+    "xss: CRS 941 - cross-site scripting",
+    "lfi: CRS 930 - local file inclusion / path traversal",
+    "rce: CRS 932 - remote code execution / command injection",
+    "scanner: CRS 913 - scanner / bot detection",
+    "log4shell: CRS 934 - Log4Shell / JNDI injection",
+    "session_fixation: CRS 943 - session fixation",
+    "protocol: CRS 920 + anomaly scoring - protocol enforcement",
+    "request_smuggling: CRS 921 - HTTP request smuggling / response splitting",
+    "rfi: CRS 931 - remote file inclusion",
+    "php_injection: CRS 933 - PHP injection",
+    "method_enforcement: CRS 911 - HTTP method enforcement",
+    "java_attack: CRS 944 - Java / Spring attack",
+    "generic: CRS 934 - SSTI, SSRF, Node.js, Ruby, prototype pollution, ORM injection",
+    "multipart: CRS 922 - multipart/form-data structural attacks",
+    "chain: multi-step chained attack scenarios",
+    "body_inspection: request body inspection across body framing variants",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14",
+]
