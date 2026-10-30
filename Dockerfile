@@ -9,7 +9,11 @@
 # junit.xml and report.html are written to /app/reports; mount a volume
 # there to collect them.
 
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+# Must match the runtime base: the venv carries musl-linked wheels, which a
+# glibc image cannot load, and a Python of a different minor version cannot
+# find at all.
+FROM python:3.15-alpine AS builder
+COPY --from=docker.io/astral/uv:latest /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -22,7 +26,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 
-FROM python:3.12-slim-bookworm
+FROM python:3.15-alpine
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
