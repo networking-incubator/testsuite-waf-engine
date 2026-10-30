@@ -91,8 +91,40 @@ define run-image
 endef
 
 .PHONY: image
-image:
+image: image-build image-smoke
+
+.PHONY: image-build
+image-build:
 	$(CONTAINER_ENGINE) build -t $(IMAGE):$(IMAGE_TAG) .
+
+# Run the image with whatever is in ARGS. The image-* targets below are the
+# useful presets; this one is for anything else, including the smoke test.
+.PHONY: image-run
+image-run:
+	$(call run-image,$(ARGS))
+
+# Directory the smoke test copies its reports into, so a real run's reports
+# in REPORT_DIR are left alone.
+SMOKE_REPORT_DIR := $(CURDIR)/.smoke-reports
+
+# The same checks CI runs on a pull request. No gateway needed: collection
+# still exercises the entrypoint, the pytest config and every test import.
+.PHONY: image-smoke
+image-smoke:
+	@echo "smoke: collecting tests, and writing reports, inside the image"
+	@$(MAKE) --no-print-directory image-run \
+		GATEWAY_URL=http://gateway.invalid HEADERS= ARGS="--collect-only -q" \
+		CONTAINER_NAME=$(CONTAINER_NAME)-smoke REPORT_DIR=$(SMOKE_REPORT_DIR)
+	@test -s $(SMOKE_REPORT_DIR)/junit.xml
+	@test -s $(SMOKE_REPORT_DIR)/report.html
+	@rm -rf $(SMOKE_REPORT_DIR)
+	@echo "smoke: run without a gateway is refused"
+	@if $(CONTAINER_ENGINE) run --rm -e GATEWAY_URL= $(IMAGE):$(IMAGE_TAG) -q \
+		>/dev/null 2>&1; then \
+		echo "entrypoint accepted an empty GATEWAY_URL" >&2; \
+		exit 1; \
+	fi
+	@echo "smoke: ok"
 
 .PHONY: image-test
 image-test:

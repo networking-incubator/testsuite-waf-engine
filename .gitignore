@@ -221,3 +221,4 @@ __marimo__/
 
 # Pytest reports
 reports/
+.smoke-reports/
