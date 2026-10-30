@@ -1,0 +1,79 @@
+name: release
+
+# Publishes the test suite image on a v#.#.# tag, e.g.
+#   git tag v1.2.3 && git push origin v1.2.3
+# Needs the QUAY_USERNAME and QUAY_TOKEN repository secrets, which should
+# hold a Quay robot account with write access to the repository below.
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  # Lets a release be re-cut by hand, e.g. after rotating the robot token.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing v#.#.# tag to build
+        required: true
+
+env:
+  IMAGE: quay.io/waf/testsuite-waf-engine
+
+jobs:
+  # Re-run both checks on the tagged commit; nothing is published unless
+  # they pass.
+  lint:
+    uses: ./.github/workflows/lint.yml
+    with:
+      ref: ${{ inputs.tag || github.ref }}
+
+  verify-image:
+    uses: ./.github/workflows/image.yml
+    with:
+      ref: ${{ inputs.tag || github.ref }}
+
+  image:
+    needs: [lint, verify-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Actions are pinned to full-length commit SHAs, as the org requires.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      # v1.2.3 produces the tags 1.2.3, 1.2, 1 and latest.
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ inputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }}
+            type=semver,pattern={{major}},value=${{ inputs.tag }}
+            type=raw,value=latest
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The suite needs a gateway to test anything, so just prove the image
+      # starts and that pytest can collect inside it.
+      - name: Smoke test the published image
+        run: |
+          docker run --rm -e GATEWAY_URL=http://gateway.invalid \
+            "${IMAGE}:${TAG}" --collect-only -q
+        env:
+          TAG: ${{ steps.meta.outputs.version }}

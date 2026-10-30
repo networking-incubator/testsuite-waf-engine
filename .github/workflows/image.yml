@@ -1,0 +1,65 @@
+name: image
+
+# Builds the image and proves it runs, so a broken Dockerfile, entrypoint or
+# dependency lock is caught here rather than when a release tag is pushed.
+# Nothing is published; the release workflow owns pushing to the registry.
+on:
+  pull_request:
+  # On main this runs as part of the build and release workflows, which gate
+  # publishing an image on it passing.
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit or tag to check out; defaults to the calling ref.
+        type: string
+        required: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Actions are pinned to full-length commit SHAs, as the org requires.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: false
+          load: true
+          tags: waf-engine-testsuite:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The suite needs a gateway to test anything, so collection is as far as
+      # this can go: it still exercises the entrypoint, the pytest config and
+      # every test module's import.
+      - name: Collect tests inside the image
+        run: |
+          docker run --rm -e GATEWAY_URL=http://gateway.invalid \
+            waf-engine-testsuite:ci --collect-only -q
+
+      # The entrypoint refuses to run without a target, and must say so
+      # rather than starting pytest against nothing.
+      - name: Reject a run with no gateway
+        run: |
+          if docker run --rm -e GATEWAY_URL= waf-engine-testsuite:ci -q; then
+            echo "entrypoint accepted an empty GATEWAY_URL" >&2
+            exit 1
+          fi
+
+      # Copied out rather than bind-mounted, the way the make targets do it,
+      # so the check does not depend on the runner's uid matching the image's.
+      - name: Reports are written
+        run: |
+          docker run --name reports-check -e GATEWAY_URL=http://gateway.invalid \
+            waf-engine-testsuite:ci --collect-only -q
+          docker cp reports-check:/app/reports ./reports
+          docker rm reports-check
+          test -s reports/junit.xml
+          test -s reports/report.html
