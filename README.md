@@ -57,3 +57,16 @@ the easier way to get them out:
 podman run --rm -e GATEWAY_URL=http://gateway:10000 \
     waf-engine-testsuite -m attack -v
 ```
+
+## Published images
+
+Images live in `quay.io/waf/testsuite-waf-engine`:
+
+- `latest`, `1.2.3`, `1.2`, `1` - cut from a `v#.#.#` tag.
+- `devel`, `main-<sha>` - the tip of main, rebuilt on every merge.
+
+Both are published only after lint and the image smoke test pass. To release:
+
+```sh
+git tag v1.2.3 && git push origin v1.2.3
+```
