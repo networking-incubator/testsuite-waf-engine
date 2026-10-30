@@ -33,28 +33,24 @@ check: uv-env
 	uv run ruff check .
 	uv run ruff format --check .
 
-# An explicit -m replaces the default filter in pyproject.toml, so every
-# selection below has to re-exclude multipart itself.
 .PHONY: test-true
 test-true: uv-env
-	$(PYTEST) -m 'normal and not multipart'
+	$(PYTEST) -m normal
 
 .PHONY: test-attack
 test-attack: uv-env
-	$(PYTEST) -m 'attack and not multipart'
+	$(PYTEST) -m attack
 
 # CRS detection coverage - a failure here is a ruleset or tuning problem.
 .PHONY: test-rules
 test-rules: uv-env
-	$(PYTEST) -m 'rules and not multipart'
+	$(PYTEST) -m rules
 
 # WAF connector behavior - a failure here is an engine problem.
 .PHONY: test-engine
 test-engine: uv-env
-	$(PYTEST) -m 'engine and not multipart'
+	$(PYTEST) -m engine
 
-# Multipart currently panics the engine's Wasm VM and degrades the gateway
-# for later requests, so it is opt-in and runs on its own.
 .PHONY: test-multipart
 test-multipart: uv-env
 	$(PYTEST) -m multipart
@@ -132,19 +128,19 @@ image-test:
 
 .PHONY: image-test-true
 image-test-true:
-	$(call run-image,-m 'normal and not multipart')
+	$(call run-image,-m normal)
 
 .PHONY: image-test-attack
 image-test-attack:
-	$(call run-image,-m 'attack and not multipart')
+	$(call run-image,-m attack)
 
 .PHONY: image-test-rules
 image-test-rules:
-	$(call run-image,-m 'rules and not multipart')
+	$(call run-image,-m rules)
 
 .PHONY: image-test-engine
 image-test-engine:
-	$(call run-image,-m 'engine and not multipart')
+	$(call run-image,-m engine)
 
 .PHONY: image-test-multipart
 image-test-multipart:

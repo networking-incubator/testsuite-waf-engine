@@ -16,8 +16,6 @@ import pytest
 SQLI = "1' OR '1'='1"
 XSS = "<script>alert(1)</script>"
 
-JSON_BODY_NOT_PARSED = "engine does not parse JSON bodies into args (audit log shows args:{})"
-
 
 @pytest.mark.attack
 @pytest.mark.sqli
@@ -55,7 +53,6 @@ def test_xss_in_json_body(gateway_url, browser_session):
 
 @pytest.mark.attack
 @pytest.mark.sqli
-@pytest.mark.xfail(reason=JSON_BODY_NOT_PARSED, strict=False)
 def test_sqli_in_json_body(gateway_url, browser_session):
     """SQLi in a JSON body is inspected like any other body encoding.
 
@@ -75,7 +72,6 @@ def test_sqli_in_json_body(gateway_url, browser_session):
 
 @pytest.mark.attack
 @pytest.mark.sqli
-@pytest.mark.xfail(reason=JSON_BODY_NOT_PARSED, strict=False)
 def test_sqli_in_nested_json_body(gateway_url, browser_session):
     """A payload nested in JSON objects and arrays is still reached."""
     resp = browser_session.post(

@@ -76,18 +76,11 @@ def test_sqli_in_trailer_terminated_body(chunked_request):
 @pytest.mark.body_inspection
 @pytest.mark.multipart
 @pytest.mark.sqli
-@pytest.mark.xfail(
-    reason="multipart body panics the Wasm VM (temp_dir unsupported on WASI)",
-    strict=False,
-)
 def test_multipart_body_is_inspected(gateway_url, browser_session):
     """A payload inside a multipart part is inspected like any other body.
 
     The same payload in a urlencoded body is blocked, so a multipart
     wrapper must not become a way around request body inspection.
-
-    Carries the multipart marker, so it is excluded from a default run
-    along with tests/rules/test_multipart.py — see that module for why.
     """
     resp = browser_session.post(
         f"{gateway_url}/greet",

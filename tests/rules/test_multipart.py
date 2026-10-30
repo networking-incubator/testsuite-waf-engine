@@ -12,21 +12,13 @@ Expected triggering rules:
   - 922120: Content-Transfer-Encoding part header (deprecated by RFC 7578)
   - 922130: multipart header contains characters outside the valid range
 
-Every test here is xfail, and the whole module is deselected from a
-default run: against the current engine, any multipart/form-data body
-panics the Wasm VM in on_http_request_body with "not supported by WASI
-yet" (std::env::temp_dir(), which Coraza's multipart processor calls to
-spill uploaded parts to disk). With failure_policy FAIL_CLOSED the
-request becomes a 503, and because each panic takes out a worker VM, a
-handful of such requests degrades the gateway for unrelated traffic.
-
-Running these therefore corrupts the results of every test that follows,
-which is why pyproject.toml excludes the multipart marker by default.
-Run them deliberately with `make test-multipart`. They flip to passing
-once multipart parsing works; until then they double as a reproducer.
+These used to panic the engine's Wasm VM on any multipart body, which is
+why the module was once excluded from a default run. The engine parses
+multipart now, so they run like everything else; what remains is a
+detection gap in three of the structural cases, marked xfail below.
 
 See test_multipart_body_is_inspected in tests/engine/test_body_inspection.py
-for the matching engine-side gap.
+for the engine-side counterpart, which now passes.
 """
 
 import pytest
@@ -35,9 +27,10 @@ import pytest
 BOUNDARY = "X"
 CONTENT_TYPE = f"multipart/form-data; boundary={BOUNDARY}"
 
-# Any multipart body panics the Wasm VM before a rule can evaluate, so the
-# gateway answers 503 (FAIL_CLOSED) instead of 403.
-MULTIPART_PANICS_VM = "multipart body panics the Wasm VM (temp_dir unsupported on WASI)"
+# The body reaches the ruleset now, but these three structural cases are
+# not scored up to the blocking threshold: two are answered by the backend
+# (200) and the byte-range case hits the body limit first (413).
+MULTIPART_NOT_BLOCKED = "CRS 922 structural case is not blocked (gets 200 or 413)"
 
 
 CASES = [
@@ -49,22 +42,24 @@ CASES = [
     pytest.param(
         b'--X\r\nContent-Disposition: form-data; name="_charset_"\r\n\r\nutf-8\r\n--X--\r\n',
         id="charset-part",
+        marks=pytest.mark.xfail(reason=MULTIPART_NOT_BLOCKED, strict=False),
     ),
     pytest.param(
         b'--X\r\nContent-Disposition: form-data; name="f"; filename="a.txt"\r\n'
         b"Content-Type: text/plain; charset=bogus-charset\r\n\r\nA\r\n--X--\r\n",
         id="illegal-part-content-type-charset",
+        marks=pytest.mark.xfail(reason=MULTIPART_NOT_BLOCKED, strict=False),
     ),
     pytest.param(
         b'--X\r\nContent-Disposition: form-data; name="name"\r\n\xc0Evil: x\r\n\r\nA\r\n--X--\r\n',
         id="invalid-header-byte-range",
+        marks=pytest.mark.xfail(reason=MULTIPART_NOT_BLOCKED, strict=False),
     ),
 ]
 
 
 @pytest.mark.attack
 @pytest.mark.multipart
-@pytest.mark.xfail(reason=MULTIPART_PANICS_VM, strict=False)
 @pytest.mark.parametrize("body", CASES)
 def test_multipart_attack(gateway_url, browser_session, body):
     """Each malformed multipart body should trigger a CRS 922 rule and be blocked."""
@@ -81,13 +76,8 @@ def test_multipart_attack(gateway_url, browser_session, body):
 
 @pytest.mark.normal
 @pytest.mark.multipart
-@pytest.mark.xfail(reason=MULTIPART_PANICS_VM, strict=False)
 def test_benign_multipart_passes(gateway_url, browser_session):
-    """A well-formed multipart upload is not caught by the 922 structural rules.
-
-    This is the clearest statement of the panic: even a benign upload
-    never reaches the backend.
-    """
+    """A well-formed multipart upload is not caught by the 922 structural rules."""
     resp = browser_session.post(
         f"{gateway_url}/greet",
         data=b'--X\r\nContent-Disposition: form-data; name="name"\r\n\r\nAlice\r\n--X--\r\n',

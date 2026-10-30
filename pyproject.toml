@@ -37,10 +37,7 @@ parametrize-names-type = "csv"
 
 [tool.pytest.ini_options]
 pythonpath = ["tests"]
-# Multipart requests currently panic the engine's Wasm VM, and each panic
-# degrades the gateway for every later request, so they are opt-in:
-# run them on their own with `make test-multipart`.
-addopts = "-m 'not multipart' -q"
+addopts = "-q"
 markers = [
     "rules: CRS detection coverage - applied automatically to tests/rules",
     "engine: WAF connector behavior - applied automatically to tests/engine",
